@@ -180,8 +180,43 @@ Security is an important consideration when designing embedded Linux systems.
 
 Secure Boot is designed to establish a chain of trust during system startup by verifying the authenticity and integrity of boot components before execution.
 
-For this project, the Secure Boot configuration and its validation status must be documented separately from the features already confirmed.
+For this project, the Secure Boot configuration and its validation status are be documented separately from the features already confirmed.
 
 A complete implementation assessment should identify:
 
-- The boot
+- The boot components covered by verification.
+- The cryptographic keys and trust anchors used.
+- The signature verification mechanism.
+- The configuration and provisioning steps.
+- The tests demonstrating that unauthorized boot components are rejected.
+
+**Implementation status:** Not documented in the validated feature list.
+
+### Remote Software Updates
+
+The project uses OPKG for package management and HTTP for package delivery.
+
+HTTP alone does not provide transport confidentiality or server authentication. The integrity and authenticity of packages must be assessed separately.
+
+Potential security measures include authenticated package repositories, cryptographic package signature verification, and secure transport.
+
+### Isolation and Access Control
+
+Isolation can help reduce the impact of a compromised application or service.
+
+Relevant areas to assess include:
+
+- Linux user and group permissions.
+- Service privileges and systemd security settings.
+- Process and resource isolation.
+- Restrictions on access to devices and system resources.
+
+The mechanisms actually implemented and tested should be documented with their corresponding configuration and evidence.
+
+
+## Author
+
+**Meysoun Gharbi**
+
+Embedded Systems Cybersecurity Student  
+Université Bretagne Sud, France
