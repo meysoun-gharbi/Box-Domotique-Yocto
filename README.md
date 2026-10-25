@@ -1,42 +1,187 @@
-Mini-Projet Systèmes Embarqués : Box Domotique (SEM2205T)
-Ce dépôt contient les livrables pour la création d'une distribution Linux embarquée personnalisée (Yocto/Poky) pour la carte STM32MP135F-DK.
+# Embedded Linux Home Automation Box
+### Yocto / Poky • STM32MP135F-DK • Embedded Systems
 
-Le système transforme la carte en box domotique capable de relever des données capteurs et de se mettre à jour à distance.
+A customized embedded Linux distribution developed with **Yocto Project / Poky (Kirkstone)** for the STM32MP135F-DK development board.
 
-Contenu du Dépôt
-core-image-ubs-homeautomation-stm32mp13-disco.wic.gz : L'image disque binaire prête à être flashée (contient Bootloader + Kernel + Rootfs).
-Documentation : Procédures d'installation et de compilation ci-dessous.
-Sources du Projet (Environnement de Compilation)
-En raison de la taille de l'environnement Yocto (plusieurs Go), les sources complètes (Layer meta-ubs, configuration local.conf, et recettes) sont hébergées externement.
+The project transforms the board into a home automation platform capable of collecting environmental sensor data, automatically running applications at startup, and supporting remote software package updates.
 
-TÉLÉCHARGER L'ARCHIVE DU PROJET COMPLET (.tar.gz)
+## Table of Contents
 
-Guide de Flashage Rapide (Sans recompiler)
-Si vous souhaitez uniquement tester le fonctionnement sur la carte sans recompiler le projet :
+- [Project Overview](#project-overview)
+- [Hardware and Technologies](#hardware-and-technologies)
+- [Validated Features](#validated-features)
+- [System Architecture](#system-architecture)
+- [Repository Contents](#repository-contents)
+- [Quick Start: Flashing the Image](#quick-start-flashing-the-image)
+- [Building from Source](#building-from-source)
+- [Security Considerations](#security-considerations)
+- [Possible Improvements](#possible-improvements)
+- [Author](#author)
 
-Récupérez l'image .wic.gz présente dans ce dépôt GitLab.
-Décompressez l'archive :
+## Project Overview
+
+The objective of this project is to build a custom Linux distribution for an embedded system using Yocto.
+
+The system integrates an I²C environmental sensor, manages application startup through systemd, and provides package management capabilities for software updates.
+
+## Hardware and Technologies
+
+### Hardware
+
+- **Development board:** STM32MP135F-DK
+- **Environmental sensor:** Si7021 temperature and humidity sensor
+- **Storage:** microSD card
+
+### Software and Technologies
+
+- Yocto Project / Poky — Kirkstone
+- BitBake
+- Embedded Linux
+- I²C
+- systemd
+- OPKG package manager
+- Yocto SDK and cross-compilation
+
+## Validated Features
+
+| Feature | Technology | Status |
+|---|---|---|
+| Custom Linux image | Yocto / Poky (Kirkstone) | Validated |
+| Custom Yocto layer | `meta-ubs-homeautomation` | Validated |
+| Environmental data acquisition | Si7021 over I²C | Validated |
+| Automatic application startup | systemd / `sensor-app` | Validated |
+| Remote package updates | OPKG over HTTP | Validated |
+| Cross-development environment | Yocto SDK | Generated |
+
+## System Architecture
+
+The system consists of the following components:
+
+1. **Embedded Linux:** A custom Linux image generated with Yocto.
+2. **Custom Yocto layer:** Project-specific recipes and configuration.
+3. **Sensor acquisition:** The `sensor-app` application reads temperature and humidity measurements from the Si7021 sensor over I²C.
+4. **Service management:** systemd launches the sensor application automatically during system startup.
+5. **Package management:** OPKG provides package installation and update capabilities.
+6. **Development environment:** The generated SDK supports cross-compilation for the target platform.
+
+## Repository Contents
+
+The repository provides project documentation and instructions for using the prebuilt image or rebuilding the distribution.
+
+The complete Yocto build environment is distributed separately because it requires several gigabytes of storage.
+
+**Complete source archive:**
+
+[Download the complete Yocto project (.tar.gz)](https://drive.google.com/file/d/1K6YCgpWTaJXH-AVsfeb3520LOSip9Ydv/view?usp=drive_link)
+
+The archive contains the project sources and build configuration. Its directory structure should be checked before following the build instructions.
+
+## Quick Start: Flashing the Image
+
+This procedure allows you to test the prebuilt image without rebuilding the entire Yocto environment.
+
+### Requirements
+
+- STM32MP135F-DK development board
+- Compatible microSD card
+- Linux computer
+- Prebuilt image: `core-image-ubs-homeautomation-stm32mp13-disco.wic.gz`
+
+### 1. Obtain the image
+
+Download the prebuilt image from the project's release or artifact storage.
+
+### 2. Decompress the image
+
+```bash
 gunzip core-image-ubs-homeautomation-stm32mp13-disco.wic.gz
-Flashez sur la carte SD (Attention à bien identifier votre lecteur, ex: /dev/mmcblk0 ou /dev/sdX) :
-sudo dd if=core-image-ubs-homeautomation-stm32mp13-disco.wic of=/dev/mmcblk0 bs=8M status=progress conv=fdatasync
-Insérez la carte SD et bootez la STM32MP1.
-Guide de Re-Compilation (Développeur)
-Pour modifier le projet ou régénérer l'image depuis les sources :
+```
 
-Téléchargez l'archive complète via le lien Google Drive ci-dessus.
-Extrayez l'archive :
+This produces the uncompressed `.wic` disk image.
+
+### 3. Identify the target device
+
+```bash
+lsblk
+```
+
+Identify the correct device corresponding to your microSD card.
+
+**Warning:** Selecting the wrong device can permanently destroy existing data. Verify the device path before proceeding.
+
+### 4. Flash the image
+
+Replace `/dev/sdX` with the actual device representing the entire microSD card, not an individual partition.
+
+```bash
+sudo dd \
+  if=core-image-ubs-homeautomation-stm32mp13-disco.wic \
+  of=/dev/sdX \
+  bs=8M \
+  status=progress \
+  conv=fdatasync
+```
+
+Wait for the operation to finish before removing the card.
+
+### 5. Boot the board
+
+Insert the microSD card into the STM32MP135F-DK and power on the board.
+
+The resulting behavior depends on the image configuration and the board's boot settings.
+
+## Building from Source
+
+The complete build environment is available in the source archive.
+
+### 1. Download and extract the archive
+
+```bash
 tar -xzvf sauvegarde_yocto_complet.tar.gz
-cd my-yocto-project
-Initialisez l'environnement :
+```
+
+Navigate to the extracted project directory. The exact path depends on the archive's structure.
+
+### 2. Initialize the Yocto environment
+
+Navigate to the Poky directory:
+
+```bash
 cd poky
 source oe-init-build-env
-Lancez la compilation :
+```
+
+This command initializes the build environment and normally changes the current directory to the build directory.
+
+### 3. Verify the configuration
+
+Before compiling, verify that:
+
+- The appropriate machine configuration is selected.
+- The custom layer is included in `bblayers.conf`.
+- The required settings are present in `local.conf`.
+- All required layers and dependencies are available.
+
+### 4. Build the image
+
+```bash
 bitbake core-image-ubs-homeautomation
-Fonctionnalités Validées
-Fonctionnalité	Détails Technique
-Boot Linux		Yocto Poky (Kirkstone) sur STM32MP135F-DK
-Layer Personnalisée		Création de meta-ubs-homeautomation
-Capteur I2C		Driver et lecture du capteur Si7021 (Temp/Hum)
-Service Auto		Application sensor-app lancée via SystemD au boot
-Mise à jour OTA		Gestionnaire OPKG configuré et fonctionnel (HTTP)
-SDK		SDK généré pour le cross-développement
+```
+
+BitBake resolves the dependencies and executes the tasks required to build the image.
+
+**Note:** Yocto builds can require substantial disk space, memory, and compilation time.
+
+## Security Considerations
+
+Security is an important consideration when designing embedded Linux systems.
+
+### Secure Boot
+
+Secure Boot is designed to establish a chain of trust during system startup by verifying the authenticity and integrity of boot components before execution.
+
+For this project, the Secure Boot configuration and its validation status must be documented separately from the features already confirmed.
+
+A complete implementation assessment should identify:
+
+- The boot
