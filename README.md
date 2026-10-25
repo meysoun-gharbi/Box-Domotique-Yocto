@@ -1,3 +1,4 @@
+
 # Embedded Linux Home Automation Box
 ### Yocto / Poky • STM32MP135F-DK • Embedded Systems
 
@@ -220,3 +221,4 @@ The mechanisms actually implemented and tested should be documented with their c
 
 Embedded Systems Cybersecurity Student  
 Université Bretagne Sud, France
+>>>>>>> 87f3a0f2a4e67bbff9d6aa2720360430161e7de7
