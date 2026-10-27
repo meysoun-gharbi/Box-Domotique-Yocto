@@ -1,0 +1,12 @@
+[Unit]
+Description=Service Domotique UBS Si7021
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/homeauto-app
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
