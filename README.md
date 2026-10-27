@@ -43,22 +43,11 @@ The system integrates an I²C environmental sensor, manages application startup 
 - OPKG package manager
 - Yocto SDK and cross-compilation
 
-## Validated Features
-
-| Feature | Technology | Status |
-|---|---|---|
-| Custom Linux image | Yocto / Poky (Kirkstone) | Validated |
-| Custom Yocto layer | `meta-ubs-homeautomation` | Validated |
-| Environmental data acquisition | Si7021 over I²C | Validated |
-| Automatic application startup | systemd / `sensor-app` | Validated |
-| Remote package updates | OPKG over HTTP | Validated |
-| Cross-development environment | Yocto SDK | Generated |
-
-##  Architecture Yocto & Layers
-- **Distribution de base** : Yocto Project / Poky
-- **Target Hardware** : Raspberry Pi (`meta-raspberrypi`)
-- **Layers de sécurité & virtualisation** : `meta-security`, `meta-virtualization`
-- **Layer personnalisée** : Création de recettes `.bb` et `.bbappend` pour l'intégration des règles AppArmor et la configuration de l'image minimale durcie
+## Yocto Architecture & Layers
+- **Base Distribution**: Yocto Project / Poky
+- **Target Hardware**: Raspberry Pi (`meta-raspberrypi`)
+- **Security & Virtualization Layers**: `meta-security`, `meta-virtualization`
+- **Custom Layer**: Creation of `.bb` and `.bbappend` recipes for AppArmor rule integration and hardened minimal image configuration.
 
 ## Repository Contents
 
@@ -168,32 +157,15 @@ BitBake resolves the dependencies and executes the tasks required to build the i
 
 **Note:** Yocto builds can require substantial disk space, memory, and compilation time.
 
-## Security Considerations
-
-Security is an important consideration when designing embedded Linux systems.
-
-## Briques de Sécurité Implémentées
-- **Secure Boot** : Mise en place de la chaîne de confiance et vérification d'intégrité du firmware avant le démarrage du noyau.
-- **Isolation des Services (Docker)** : Conteneurisation des applicatifs domotiques avec gestion stricte des `namespaces` et `cgroups`.
-- **Contrôle d'Accès Réseau & Système (AppArmor)** : Création de profils de sécurité sur-mesure pour appliquer le principe du moindre privilège aux services conteneurisé
-
-
-### Remote Software Updates
-
-The project uses OPKG for package management and HTTP for package delivery.
-
-HTTP alone does not provide transport confidentiality or server authentication. The integrity and authenticity of packages must be assessed separately.
-
-Potential security measures include authenticated package repositories, cryptographic package signature verification, and secure transport.
-
-
-The mechanisms actually implemented and tested should be documented with their corresponding configuration and evidence.
+## Implemented Security Building Blocks
+- **Secure Boot**: Setting up the chain of trust and verifying firmware integrity prior to kernel boot.
+- **Service Isolation (Docker)**: Containerization of smart home applications with strict management of `namespaces` and `cgroups`.
+- **System & Network Access Control (AppArmor)**: Creation of custom security profiles to enforce the principle of least privilege for containerized services.
 
 
 ## Author
 
 **Meysoun Gharbi**
 
-Embedded Systems Cybersecurity Student  
+Cybersecurity of Embedded Systems Student  
 Université Bretagne Sud, France
->>>>>>> 87f3a0f2a4e67bbff9d6aa2720360430161e7de7
