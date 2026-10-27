@@ -1,29 +1,36 @@
-
 # Embedded Linux Home Automation Box
-### Yocto / Poky • STM32MP135F-DK • Embedded Systems
 
-A customized embedded Linux distribution developed with **Yocto Project / Poky (Kirkstone)** for the STM32MP135F-DK development board.
+### Yocto / Poky • STM32MP135F-DK • Embedded Linux
 
-The project transforms the board into a home automation platform capable of collecting environmental sensor data, automatically running applications at startup, and supporting remote software package updates.
+A custom embedded Linux distribution developed using **Yocto Project / Poky (Kirkstone)** for the **STM32MP135F-DK** development board.
+
+The project focuses on building and configuring an embedded Linux system for home automation, including environmental sensor integration, automatic application startup, and package management.
 
 ## Table of Contents
 
 - [Project Overview](#project-overview)
 - [Hardware and Technologies](#hardware-and-technologies)
-- [Validated Features](#validated-features)
-- [System Architecture](#system-architecture)
+- [Yocto Build Architecture](#yocto-build-architecture)
 - [Repository Contents](#repository-contents)
 - [Quick Start: Flashing the Image](#quick-start-flashing-the-image)
 - [Building from Source](#building-from-source)
 - [Security Considerations](#security-considerations)
-- [Possible Improvements](#possible-improvements)
+- [Project Limitations](#project-limitations)
 - [Author](#author)
 
 ## Project Overview
 
-The objective of this project is to build a custom Linux distribution for an embedded system using Yocto.
+The objective of this project is to explore the development and customization of an embedded Linux distribution using the Yocto Project.
 
-The system integrates an I²C environmental sensor, manages application startup through systemd, and provides package management capabilities for software updates.
+The system is designed around the STM32MP135F-DK development board and a Si7021 environmental sensor.
+
+The main technical objectives include:
+
+- Building a custom Linux image using Yocto and BitBake.
+- Integrating a temperature and humidity sensor through the I²C interface.
+- Configuring automatic application startup using systemd.
+- Integrating OPKG for software package management.
+- Understanding the configuration and deployment of embedded Linux systems on hardware-constrained platforms.
 
 ## Hardware and Technologies
 
@@ -33,48 +40,61 @@ The system integrates an I²C environmental sensor, manages application startup 
 - **Environmental sensor:** Si7021 temperature and humidity sensor
 - **Storage:** microSD card
 
-### Software and Technologies
+### Software and Tools
 
-- Yocto Project / Poky — Kirkstone
+- Yocto Project / Poky (Kirkstone)
 - BitBake
 - Embedded Linux
 - I²C
 - systemd
-- OPKG package manager
+- OPKG
 - Yocto SDK and cross-compilation
 
-## Yocto Architecture & Layers
-- **Base Distribution**: Yocto Project / Poky
-- **Target Hardware**: Raspberry Pi (`meta-raspberrypi`)
-- **Security & Virtualization Layers**: `meta-security`, `meta-virtualization`
-- **Custom Layer**: Creation of `.bb` and `.bbappend` recipes for AppArmor rule integration and hardened minimal image configuration.
+## Yocto Build Architecture
+
+The distribution is built using the Yocto Project, which provides a framework for generating customized Linux systems for embedded devices.
+
+The project targets the STM32MP13 platform and focuses on integrating the software components required for the home automation application.
+
+The principal components are:
+
+- **Poky:** Reference distribution and build environment.
+- **BitBake:** Build engine responsible for processing recipes and their dependencies.
+- **Board-specific configuration:** Hardware support for the STM32MP135F-DK.
+- **systemd:** Service management and automatic application startup.
+- **I²C interface:** Communication with the environmental sensor.
+- **OPKG:** Package management for the embedded Linux system.
+
+The Yocto build system uses layers, recipes and configuration files to define the software included in the generated image.
 
 ## Repository Contents
 
-The repository provides project documentation and instructions for using the prebuilt image or rebuilding the distribution.
+This repository documents the embedded Linux distribution project and provides instructions for inspecting, building and deploying the system.
 
-The complete Yocto build environment is distributed separately because it requires several gigabytes of storage.
+The original development environment was hosted on university infrastructure because Yocto builds require significant storage and computational resources.
 
-**Complete source archive:**
+A backup of the project environment is available separately:
 
-[Download the complete Yocto project (.tar.gz)](https://drive.google.com/file/d/1K6YCgpWTaJXH-AVsfeb3520LOSip9Ydv/view?usp=drive_link)
+**[Yocto Project Archive (.tar.gz)](https://drive.google.com/file/d/1K6YCgpWTaJXH-AVsfeb3520LOSip9Ydv/view?usp=drive_link)**
 
-The archive contains the project sources and build configuration. Its directory structure should be checked before following the build instructions.
+The archive contains the saved project environment. Its contents and directory structure should be inspected before attempting to reproduce the build.
+
+The complete build environment is not tracked directly in this Git repository due to its size.
 
 ## Quick Start: Flashing the Image
 
-This procedure allows you to test the prebuilt image without rebuilding the entire Yocto environment.
+The following procedure describes how to flash a generated Yocto disk image onto a microSD card.
 
 ### Requirements
 
 - STM32MP135F-DK development board
 - Compatible microSD card
 - Linux computer
-- Prebuilt image: `core-image-ubs-homeautomation-stm32mp13-disco.wic.gz`
+- Generated image: `core-image-ubs-homeautomation-stm32mp13-disco.wic.gz`
 
 ### 1. Obtain the image
 
-Download the prebuilt image from the project's release or artifact storage.
+Locate the generated `.wic.gz` image in the Yocto build output or project archive, if available.
 
 ### 2. Decompress the image
 
@@ -90,13 +110,13 @@ This produces the uncompressed `.wic` disk image.
 lsblk
 ```
 
-Identify the correct device corresponding to your microSD card.
+Identify the device corresponding to your microSD card.
 
 **Warning:** Selecting the wrong device can permanently destroy existing data. Verify the device path before proceeding.
 
 ### 4. Flash the image
 
-Replace `/dev/sdX` with the actual device representing the entire microSD card, not an individual partition.
+Replace `/dev/sdX` with the actual device representing the entire microSD card.
 
 ```bash
 sudo dd \
@@ -111,41 +131,42 @@ Wait for the operation to finish before removing the card.
 
 ### 5. Boot the board
 
-Insert the microSD card into the STM32MP135F-DK and power on the board.
+Insert the microSD card into the STM32MP135F-DK development board and power on the system.
 
-The resulting behavior depends on the image configuration and the board's boot settings.
+The boot procedure depends on the board configuration and the generated image.
 
 ## Building from Source
 
-The complete build environment is available in the source archive.
+The original Yocto environment is stored in the project archive.
 
-### 1. Download and extract the archive
+### 1. Extract the archive
 
 ```bash
 tar -xzvf sauvegarde_yocto_complet.tar.gz
 ```
 
-Navigate to the extracted project directory. The exact path depends on the archive's structure.
+Navigate to the extracted project directory.
 
 ### 2. Initialize the Yocto environment
 
-Navigate to the Poky directory:
+If the extracted environment contains the Poky directory, navigate to it:
 
 ```bash
 cd poky
 source oe-init-build-env
 ```
 
-This command initializes the build environment and normally changes the current directory to the build directory.
+The initialization script sets up the build environment.
 
-### 3. Verify the configuration
+### 3. Verify the build configuration
 
-Before compiling, verify that:
+Before compilation, verify:
 
-- The appropriate machine configuration is selected.
-- The custom layer is included in `bblayers.conf`.
-- The required settings are present in `local.conf`.
-- All required layers and dependencies are available.
+- The machine configuration targets the appropriate STM32MP13 development board.
+- All required Yocto layers are available.
+- `bblayers.conf` contains the correct layer paths.
+- `local.conf` contains the required build settings.
+- Any project-specific recipes and dependencies are available.
 
 ### 4. Build the image
 
@@ -153,19 +174,35 @@ Before compiling, verify that:
 bitbake core-image-ubs-homeautomation
 ```
 
-BitBake resolves the dependencies and executes the tasks required to build the image.
+This command assumes the custom image recipe is present in the restored build environment.
 
-**Note:** Yocto builds can require substantial disk space, memory, and compilation time.
+**Note:** Rebuilding the project requires sufficient disk space, memory and compilation time. The original build environment was hosted on university infrastructure, and the restored archive has not yet been independently revalidated.
 
-## Implemented Security Building Blocks
-- **Secure Boot**: Setting up the chain of trust and verifying firmware integrity prior to kernel boot.
-- **Service Isolation (Docker)**: Containerization of smart home applications with strict management of `namespaces` and `cgroups`.
-- **System & Network Access Control (AppArmor)**: Creation of custom security profiles to enforce the principle of least privilege for containerized services.
+## Security Considerations
 
+Security is an important aspect of embedded Linux development, particularly for connected devices such as home automation systems.
+
+The project also provides a basis for studying several embedded Linux security mechanisms:
+
+- **System minimization:** Reducing the attack surface by limiting unnecessary packages and services.
+- **Privilege management:** Applying the principle of least privilege to applications and system services.
+- **Secure Boot:** Studying hardware-supported chains of trust and firmware integrity verification.
+- **Firmware protection:** Understanding mechanisms used to protect boot components and software integrity.
+- **Software updates:** Considering package authenticity, integrity and secure update mechanisms.
+
+These topics represent security considerations and potential extensions. They should not be interpreted as fully implemented or validated security features of the STM32 image.
+
+## Project Limitations
+
+The original development and build process was performed on university infrastructure.
+
+The available archive preserves the project environment, but its exact contents and build reproducibility still require verification.
+
+The repository therefore distinguishes between the documented project configuration, the original development objectives and security mechanisms considered for further study.
 
 ## Author
 
 **Meysoun Gharbi**
 
-Cybersecurity of Embedded Systems Student  
+Master's Student in Cybersecurity of Embedded Systems  
 Université Bretagne Sud, France
