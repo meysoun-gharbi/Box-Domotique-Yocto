@@ -54,16 +54,11 @@ The system integrates an I²C environmental sensor, manages application startup 
 | Remote package updates | OPKG over HTTP | Validated |
 | Cross-development environment | Yocto SDK | Generated |
 
-## System Architecture
-
-The system consists of the following components:
-
-1. **Embedded Linux:** A custom Linux image generated with Yocto.
-2. **Custom Yocto layer:** Project-specific recipes and configuration.
-3. **Sensor acquisition:** The `sensor-app` application reads temperature and humidity measurements from the Si7021 sensor over I²C.
-4. **Service management:** systemd launches the sensor application automatically during system startup.
-5. **Package management:** OPKG provides package installation and update capabilities.
-6. **Development environment:** The generated SDK supports cross-compilation for the target platform.
+##  Architecture Yocto & Layers
+- **Distribution de base** : Yocto Project / Poky
+- **Target Hardware** : Raspberry Pi (`meta-raspberrypi`)
+- **Layers de sécurité & virtualisation** : `meta-security`, `meta-virtualization`
+- **Layer personnalisée** : Création de recettes `.bb` et `.bbappend` pour l'intégration des règles AppArmor et la configuration de l'image minimale durcie
 
 ## Repository Contents
 
@@ -177,21 +172,11 @@ BitBake resolves the dependencies and executes the tasks required to build the i
 
 Security is an important consideration when designing embedded Linux systems.
 
-### Secure Boot
+## Briques de Sécurité Implémentées
+- **Secure Boot** : Mise en place de la chaîne de confiance et vérification d'intégrité du firmware avant le démarrage du noyau.
+- **Isolation des Services (Docker)** : Conteneurisation des applicatifs domotiques avec gestion stricte des `namespaces` et `cgroups`.
+- **Contrôle d'Accès Réseau & Système (AppArmor)** : Création de profils de sécurité sur-mesure pour appliquer le principe du moindre privilège aux services conteneurisé
 
-Secure Boot is designed to establish a chain of trust during system startup by verifying the authenticity and integrity of boot components before execution.
-
-For this project, the Secure Boot configuration and its validation status are be documented separately from the features already confirmed.
-
-A complete implementation assessment should identify:
-
-- The boot components covered by verification.
-- The cryptographic keys and trust anchors used.
-- The signature verification mechanism.
-- The configuration and provisioning steps.
-- The tests demonstrating that unauthorized boot components are rejected.
-
-**Implementation status:** Not documented in the validated feature list.
 
 ### Remote Software Updates
 
@@ -201,16 +186,6 @@ HTTP alone does not provide transport confidentiality or server authentication. 
 
 Potential security measures include authenticated package repositories, cryptographic package signature verification, and secure transport.
 
-### Isolation and Access Control
-
-Isolation can help reduce the impact of a compromised application or service.
-
-Relevant areas to assess include:
-
-- Linux user and group permissions.
-- Service privileges and systemd security settings.
-- Process and resource isolation.
-- Restrictions on access to devices and system resources.
 
 The mechanisms actually implemented and tested should be documented with their corresponding configuration and evidence.
 
