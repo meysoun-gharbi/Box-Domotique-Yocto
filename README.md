@@ -1,99 +1,131 @@
 # Embedded Linux Home Automation Box
 
-### Yocto / Poky • STM32MP135F-DK • Embedded Linux
+**Yocto Project | STM32MP135F-DK | Embedded Linux | I²C | systemd | ARM**
 
-A custom embedded Linux image developed using the **Yocto Project / Poky (Kirkstone)** for the **STM32MP135F-DK** development board.
+## Overview
 
-The project focuses on building and customizing an embedded Linux system for home automation, including environmental sensor integration, ARM application deployment, automatic startup using systemd, and package management.
+This project focuses on developing and customizing an embedded Linux system for a home automation application using the **Yocto Project / Poky (Kirkstone)**.
 
-## Table of Contents
+The target platform is the **STM32MP135F-DK** development board, integrating a Si7021 temperature and humidity sensor, a custom ARM application, and automatic application startup through systemd.
 
-- [Project Overview](#project-overview)
-- [Hardware and Technologies](#hardware-and-technologies)
-- [Yocto Build Architecture](#yocto-build-architecture)
-- [Application Integration and systemd Service](#application-integration-and-systemd-service)
-- [Repository Contents](#repository-contents)
-- [Deployment Artifacts](#deployment-artifacts)
-- [Security Considerations](#security-considerations)
-- [Project Limitations](#project-limitations)
-- [Author](#author)
+The project explores embedded Linux image customization, hardware communication, application integration, service management, and deployment on an ARM-based platform.
 
-## Project Overview
+### Main Objectives
 
-The objective of this project is to develop and customize an embedded Linux image using the Yocto Project for a home automation application.
-
-The system targets the STM32MP135F-DK development board and integrates an application designed to communicate with a Si7021 temperature and humidity sensor.
-
-The main technical objectives are:
-
-- Build a custom embedded Linux image using Yocto and BitBake.
-- Integrate a temperature and humidity sensor through the I²C interface.
-- Deploy a cross-compiled ARM application into the Linux root filesystem.
+- Build a customized embedded Linux image using Yocto and BitBake.
+- Integrate a Si7021 temperature and humidity sensor through I²C.
+- Deploy an ARM application into the Linux root filesystem.
 - Configure automatic application startup using systemd.
-- Include OPKG for software package management.
-- Explore the configuration and deployment of Linux systems on resource-constrained embedded platforms.
+- Include OPKG for package management.
+- Study the architecture and deployment of embedded Linux systems.
 
-## Hardware and Technologies
+## Technical Environment
 
-### Hardware
+| Component | Technology |
+|---|---|
+| Development board | STM32MP135F-DK |
+| Processor architecture | ARM |
+| Embedded Linux build system | Yocto Project / Poky (Kirkstone) |
+| Build automation | BitBake |
+| Custom image | `core-image-ubs-homeautomation` |
+| Environmental sensor | Si7021 |
+| Sensor interface | I²C |
+| Serial communication | UART |
+| Service management | systemd |
+| Package management | OPKG |
+| Storage | microSD card |
+| Development environment | Remote university build server |
 
-- **Development board:** STM32MP135F-DK
-- **Environmental sensor:** Si7021 temperature and humidity sensor
-- **Storage:** microSD card
-- **Communication interfaces:** I²C and UART
+## System Architecture
 
-### Software and Tools
+The embedded system is organized around the STM32MP135F-DK board, which runs a customized Linux image containing the home automation application.
 
-- Yocto Project / Poky (Kirkstone)
-- BitBake
-- Embedded Linux
-- ARM cross-compilation
-- I²C and UART interfaces
-- systemd
-- OPKG
-- Linux kernel
+```text
+             +-------------------------+
+             |    Si7021 Sensor        |
+             | Temperature / Humidity  |
+             +------------+------------+
+                          |
+                          | I2C
+                          v
+             +-------------------------+
+             |      STM32MP135F-DK     |
+             |                         |
+             |    Embedded Linux       |
+             |    Yocto / Poky         |
+             |                         |
+             |  +-------------------+  |
+             |  |   homeauto-app    |  |
+             |  |   ARM Executable  |  |
+             |  +---------+---------+  |
+             |            |            |
+             |     systemd Service     |
+             |     homeauto.service    |
+             +------------+------------+
+                          |
+                          | UART
+                          v
+             +-------------------------+
+             |   Serial Communication  |
+             +-------------------------+
+```
+
+The application communicates with the Si7021 sensor through I²C and uses UART for serial communication.
 
 ## Yocto Build Architecture
 
 The Yocto Project provides a framework for building customized Linux distributions for embedded systems.
 
-This project targets the STM32MP13 platform and uses a custom image named `core-image-ubs-homeautomation`.
-
-The main architectural components include:
+The project uses Poky (Kirkstone), BitBake, and STM32MP13 platform support to generate a Linux image targeting the STM32MP135F-DK.
 
 | Component | Role |
 |---|---|
 | Poky | Yocto reference distribution and build environment |
-| BitBake | Build engine for processing recipes and dependencies |
-| STM32MP13 board support | Hardware-specific configuration and integration |
-| Linux kernel | Operating system kernel for the target platform |
-| `homeauto-app` | ARM application for environmental sensor communication |
-| systemd | Service management and application startup |
-| OPKG | Software package management |
+| BitBake | Processes recipes and dependencies |
+| STM32MP13 board support | Hardware-specific configuration |
+| Linux kernel | Core operating system functionality |
+| `homeauto-app` | Custom ARM application |
+| systemd | Service management and automatic startup |
+| OPKG | Package management |
 
-The Yocto build system uses layers, recipes, and configuration files to define the software packages included in the generated image.
+The generated image is named:
 
-The archived package manifest confirms the inclusion of the custom `homeauto-app` package, `i2c-tools`, and Linux kernel packages.
+`core-image-ubs-homeautomation`
 
-## Application Integration and systemd Service
+The archived package manifest provides evidence of the inclusion of the custom `homeauto-app` package, `i2c-tools`, and Linux kernel packages.
 
-The custom Yocto image includes `homeauto-app`, a compiled 32-bit ARM application designed to acquire temperature and humidity measurements from a Si7021 sensor through I²C and transmit measurements through UART.
+## Application Integration
 
-Static analysis of the executable identified the following interfaces and functions:
+### Home Automation Application
 
-- **I²C:** `/dev/i2c-1`, used for sensor communication.
-- **UART:** `/dev/ttySTM0`, used for serial communication.
-- **Linux interfaces:** `open()`, `read()`, `write()`, and `ioctl()`.
+The project includes a compiled 32-bit ARM application:
 
-The generated Linux root filesystem contains the executable at:
+[`app/homeauto-app`](app/homeauto-app)
+
+The application is designed to acquire environmental measurements from the Si7021 sensor through I²C and transmit data through UART.
+
+Static analysis of the executable identified the following interfaces:
+
+| Interface | Purpose |
+|---|---|
+| `/dev/i2c-1` | I²C communication with the sensor |
+| `/dev/ttySTM0` | UART communication |
+| `open()` | Access Linux device files |
+| `read()` | Read data |
+| `write()` | Write data |
+| `ioctl()` | Perform device-specific operations |
+
+The application was integrated into the generated root filesystem at:
 
 `/usr/bin/homeauto-app`
 
-The presence of this file was verified by inspecting the archived `.ext4` root filesystem.
+Its presence was verified through inspection of the archived `.ext4` root filesystem.
 
-### Automatic Startup with systemd
+### Automatic Startup Using systemd
 
-A custom systemd service, [`homeauto.service`](homeauto.service), is included in the image to manage application startup.
+The project includes a custom systemd service:
+
+[`systemd/homeauto.service`](systemd/homeauto.service)
 
 The service configuration is:
 
@@ -112,83 +144,100 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 
-This configuration provides:
-
-- Automatic application startup when the enabled service is activated during boot.
-- Automatic restart if the application process terminates.
-- A five-second delay between restart attempts.
+This configuration provides automatic application startup when the enabled service is activated, automatic restart after process termination, and a five-second delay between restart attempts.
 
 Inspection of the generated root filesystem confirmed the presence of:
 
 - `/lib/systemd/system/homeauto.service`
 - `/etc/systemd/system/multi-user.target.wants/homeauto.service`
 
-The second path is a symbolic link that confirms the service is enabled for `multi-user.target`.
+The second path is a symbolic link indicating that the service is enabled for `multi-user.target`.
 
-### Build Evidence
+**Validation scope:** These artifacts confirm application integration and service enablement. Successful execution on the physical board has not been independently revalidated from the archived files.
 
-The repository includes the following technical artifacts:
+## Repository Structure
 
-- [`homeauto-app`](homeauto-app): compiled ARM executable recovered from the build outputs.
-- [`homeauto.service`](homeauto.service): systemd service configuration.
-- [`image.manifest`](image.manifest): package manifest of the generated Yocto image.
-- [`FlashLayout_sdcard_stm32mp135f-dk-optee.tsv`](FlashLayout_sdcard_stm32mp135f-dk-optee.tsv): STM32 flash partition layout.
+```text
+Box-Domotique-Yocto/
+├── README.md
+├── .gitignore
+│
+├── app/
+│   └── homeauto-app
+│
+├── systemd/
+│   └── homeauto.service
+│
+├── yocto/
+│   └── image.manifest
+│
+└── flashing/
+    └── FlashLayout_sdcard_stm32mp135f-dk-optee.tsv
+```
 
-These artifacts demonstrate application packaging, integration into the Linux root filesystem, and systemd service configuration.
+### Repository Contents
 
-**Verification scope:** The archived artifacts confirm build-time integration and service enablement. Successful execution on the physical board has not been independently revalidated from these artifacts.
+| File | Description |
+|---|---|
+| [`app/homeauto-app`](app/homeauto-app) | Compiled ARM home automation application |
+| [`systemd/homeauto.service`](systemd/homeauto.service) | systemd service configuration |
+| [`yocto/image.manifest`](yocto/image.manifest) | Package manifest of the generated Yocto image |
+| [`flashing/FlashLayout_sdcard_stm32mp135f-dk-optee.tsv`](flashing/FlashLayout_sdcard_stm32mp135f-dk-optee.tsv) | STM32MP135F-DK flash partition layout |
 
-## Repository Contents
-
-This repository provides technical documentation and selected artifacts from the embedded Linux home automation project.
-
-The original development environment was hosted on university infrastructure because Yocto builds require substantial storage and computational resources.
-
-A separate project archive is available here:
-
-**[Yocto Project Archive (Google Drive)](https://drive.google.com/file/d/1K6YCgpWTaJXH-AVsfeb3520LOSip9Ydv/view?usp=drive_link)**
-
-The contents and completeness of this archive should be verified before using it to reproduce the build.
-
-The complete Yocto development environment is not tracked directly in this repository because of its size.
-
-The repository currently provides compiled application and deployment artifacts rather than a complete, independently verified source-based build environment.
+These files document the available application, image composition, and deployment artifacts.
 
 ## Deployment Artifacts
 
-The archived Yocto build outputs include separate filesystem images for the STM32MP135F-DK platform:
+The archived Yocto build outputs include the following filesystem images:
 
-- `st-image-bootfs-poky-stm32mp13-disco.ext4`
-- `st-image-vendorfs-poky-stm32mp13-disco.ext4`
-- `core-image-ubs-homeautomation-stm32mp13-disco.ext4`
-- `st-image-userfs-poky-stm32mp13-disco.ext4`
+```text
+st-image-bootfs-poky-stm32mp13-disco.ext4
+st-image-vendorfs-poky-stm32mp13-disco.ext4
+core-image-ubs-homeautomation-stm32mp13-disco.ext4
+st-image-userfs-poky-stm32mp13-disco.ext4
+```
 
-The `FlashLayout_sdcard_stm32mp135f-dk-optee.tsv` file describes the target partition layout, including boot firmware components and filesystem partitions.
+The flashing layout file describes the target partition structure and references components associated with the STM32 boot chain, including TF-A, FIP, and an OP-TEE-related configuration.
 
-The layout references boot components associated with the STM32 boot chain, including TF-A, FIP, and an OP-TEE-related configuration. Their presence in the layout does not by itself demonstrate that authenticated Secure Boot was enabled.
+**Important:** The presence of these boot components in the flashing layout does not demonstrate that authenticated Secure Boot was enabled.
 
-The complete flashing procedure has not yet been revalidated.
+Individual `.ext4` filesystem images are not complete SD-card disk images. Deployment requires the appropriate STM32 flashing procedure and compatible boot components.
 
-**Important:** Individual `.ext4` filesystem images must not be treated as complete SD-card disk images. Deployment requires the appropriate STM32 flashing procedure and compatible boot components.
+The complete flashing procedure has not been independently revalidated.
+
+## Build Environment and Reproducibility
+
+The Yocto build environment was hosted on a remote university server due to the significant computational and storage resources required for embedded Linux image generation.
+
+The original BitBake recipes, custom layers, and build configurations are no longer accessible through that server.
+
+Consequently, this repository contains the available compiled application, systemd service configuration, package manifest, and flashing layout, but **does not contain a complete reproducible Yocto build environment**.
+
+A separate project archive is available:
+
+[Yocto Project Archive — Google Drive](https://drive.google.com/file/d/1K6YCgpWTaJXH-AVsfeb3520LOSip9Ydv/view?usp=drive_link)
+
+The contents and completeness of this archive have not been independently verified for full build reproduction.
+
+Rebuilding the original image from this GitHub repository alone is therefore not currently possible.
 
 ## Security Considerations
 
-Security is an important aspect of embedded Linux development, particularly for connected devices such as home automation systems.
+Embedded Linux security is particularly important for connected devices such as home automation systems.
 
-This project provides a basis for studying several embedded Linux security mechanisms:
+This project provides a basis for studying:
 
-- **System minimization:** Reducing the attack surface by limiting unnecessary packages and services.
-- **Privilege management:** Applying the principle of least privilege to applications and system services.
-- **Secure Boot:** Studying hardware-supported chains of trust and firmware integrity verification.
-- **Firmware protection:** Understanding mechanisms used to protect boot components and software integrity.
-- **Software updates:** Considering package authenticity, integrity, and secure update mechanisms.
-- **Service reliability:** Using systemd to manage application lifecycle and automatic restart.
+- **System minimization:** Reducing unnecessary packages and services.
+- **Privilege management:** Applying least-privilege principles.
+- **Secure Boot:** Understanding hardware-supported chains of trust.
+- **Firmware integrity:** Protecting boot components against unauthorized modification.
+- **Secure software updates:** Verifying the authenticity and integrity of updates.
+- **Service reliability:** Managing application lifecycle using systemd.
 
-These topics represent security considerations and possible extensions. They should not be interpreted as fully implemented or validated security features of the generated STM32 image.
+These topics represent security considerations and potential future improvements. They should not be interpreted as fully implemented or experimentally validated security protections in the generated image.
 
-## Author
+## Project Limitations
 
-**Meysoun Gharbi**
+The main limitations are:
 
-Master's Student in Cybersecurity of Embedded Systems  
-Université Bretagne Sud, France
+-
